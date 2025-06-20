@@ -1,7 +1,15 @@
 import spacy
 from spacy.matcher import PhraseMatcher
 
-nlp = spacy.load("en_core_web_sm")
+
+#check if en_core_web_sm is installed, if not, download it
+try:
+    spacy.load("en_core_web_sm")
+except OSError:
+    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+finally:
+    nlp = spacy.load("en_core_web_sm")
+
 
 SKILLS_DB = [
     "machine learning", "deep learning", "supervised learning", "unsupervised learning",
