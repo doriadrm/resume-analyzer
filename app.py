@@ -8,10 +8,17 @@ import base64
 from datetime import datetime
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
+import time
 
-model_name = "facebook/bart-large-cnn"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+#load summarization model (cached)
+@st.cache_resource
+def load_model():
+    model_name = "facebook/bart-large-cnn"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+    return tokenizer, model
+
+tokenizer, model = load_model()
 
 def gpt_feedback(resume, job):
     try:
@@ -22,115 +29,144 @@ def gpt_feedback(resume, job):
     except Exception as e:
         return f"⚠️ HuggingFace model error: {e}"
 
-st.set_page_config(page_title="Resume Analyzer AI", page_icon="📄")
+#Page configuration
+st.set_page_config(page_title="Resume Analyzer AI", page_icon="📄", layout="wide")
 
-st.title("📄 Resume Analyzer with AI 🤖")
-st.markdown("Upload your resume, paste a job description, and see how well your resume matches!")
+#Custom CSS styling
+st.markdown("""
+<style>
+body, .stApp {
+    background-color: #f5f7fa;
+    font-family: 'Segoe UI', sans-serif;
+}
+h1, h2, h3 {
+    color: #333;
+}
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+.report-container {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.metric-label {
+    font-weight: bold;
+    color: #444;
+}
+</style>
+""", unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("📁 Upload your resume (PDF or DOCX)", type=["pdf", "docx"])
-job_desc = st.text_area("📝 Paste the job description here:")
+#Title and Description
+st.title("📄 Resume Analyzer with AI")
+st.markdown("This tool analyzes your resume against any job description and offers smart, contextual feedback. No fluff — just actionable insights.")
+
+#upload and Job Description Input
+col1, col2 = st.columns([1, 2])
+with col1:
+    uploaded_file = st.file_uploader("📁 Upload Resume", type=["pdf", "docx"])
+with col2:
+    job_desc = st.text_area("📝 Paste Job Description")
 
 if uploaded_file and job_desc:
-    st.subheader("📌 Extracting Resume Data...")
-
-    try:
-        if uploaded_file.name.endswith(".pdf"):
-            resume_text = extract_text_from_pdf(uploaded_file)
-        elif uploaded_file.name.endswith(".docx"):
-            resume_text = extract_text_from_docx(uploaded_file)
-        else:
-            st.error("Unsupported file format.")
+    with st.spinner("🔍 Reading resume..."):
+        try:
+            if uploaded_file.name.endswith(".pdf"):
+                resume_text = extract_text_from_pdf(uploaded_file)
+            elif uploaded_file.name.endswith(".docx"):
+                resume_text = extract_text_from_docx(uploaded_file)
+        except Exception as e:
+            st.error(f"❌ Error extracting text: {e}")
             st.stop()
-    except Exception as e:
-        st.error(f"Error extracting text: {e}")
-        st.stop()
 
-    with st.expander("🔍 View Extracted Resume Text"):
-        st.write(resume_text or "No text found.")
+    st.success("✅ Resume parsed successfully!")
 
+    #Extracted skills
     extracted_resume_skills = extract_skills(resume_text)
     extracted_job_skills = extract_skills(job_desc)
 
-    st.subheader("🎯 Extracted Skills from Resume")
-    if extracted_resume_skills:
-        st.success(", ".join(sorted(extracted_resume_skills)))
-    else:
-        st.warning("No relevant skills detected in the resume.")
-
-    st.subheader("🧾 Extracted Skills from Job Description")
-    if extracted_job_skills:
-        st.info(", ".join(sorted(extracted_job_skills)))
-    else:
-        st.warning("No relevant skills detected in the job description.")
-
     def show_skill_charts(resume_skills, job_skills):
-        matched = set(skill.lower() for skill in resume_skills) & set(skill.lower() for skill in job_skills)
-        missing = set(skill.lower() for skill in job_skills) - matched
+        matched = set(s.lower() for s in resume_skills) & set(s.lower() for s in job_skills)
+        missing = set(s.lower() for s in job_skills) - matched
 
-        match_data = pd.DataFrame({
+        match_df = pd.DataFrame({
             "Type": ["Matched", "Missing"],
             "Count": [len(matched), len(missing)]
         })
-        fig1 = px.bar(match_data, x="Type", y="Count", color="Type", title="Skill Match Overview",
-                      color_discrete_map={"Matched": "green", "Missing": "red"})
-        st.plotly_chart(fig1)
+        st.plotly_chart(px.bar(match_df, x="Type", y="Count", color="Type",
+                               color_discrete_map={"Matched": "green", "Missing": "red"},
+                               title="Skill Match Overview"), use_container_width=True)
 
-        if matched:
-            matched_df = pd.DataFrame({"Skill": sorted(matched), "Status": ["Matched"] * len(matched)})
-        else:
-            matched_df = pd.DataFrame(columns=["Skill", "Status"])
+        if matched or missing:
+            full_df = pd.DataFrame({
+                "Skill": list(matched) + list(missing),
+                "Status": ["Matched"] * len(matched) + ["Missing"] * len(missing)
+            })
+            st.plotly_chart(px.pie(full_df, names="Skill", color="Status", title="Matched vs Missing Skills",
+                                   color_discrete_map={"Matched": "green", "Missing": "red"}), use_container_width=True)
 
-        if missing:
-            missing_df = pd.DataFrame({"Skill": sorted(missing), "Status": ["Missing"] * len(missing)})
-        else:
-            missing_df = pd.DataFrame(columns=["Skill", "Status"])
+    st.markdown("---")
+    st.subheader("🎯 Skills Extraction")
 
-        full_df = pd.concat([matched_df, missing_df])
+    col3, col4 = st.columns(2)
+    with col3:
+        st.markdown("**From Resume:**")
+        st.success(", ".join(sorted(extracted_resume_skills)) if extracted_resume_skills else "No skills detected.")
+    with col4:
+        st.markdown("**From Job Description:**")
+        st.info(", ".join(sorted(extracted_job_skills)) if extracted_job_skills else "No skills detected.")
 
-        if not full_df.empty:
-            fig2 = px.pie(full_df, names="Skill", title="Matched vs Missing Skills Breakdown", color="Status",
-                          color_discrete_map={"Matched": "green", "Missing": "red"})
-            st.plotly_chart(fig2)
-
-    st.subheader("📊 Skills Match Overview")
     show_skill_charts(extracted_resume_skills, extracted_job_skills)
 
-    match_score = match_resume_to_job(resume_text, job_desc)
-    st.subheader("✅ Resume Match Score")
+    #Resume match score
+    st.markdown("---")
+    st.subheader("📈 Resume Match Score")
+    with st.spinner("🔎 Calculating similarity..."):
+        match_score = match_resume_to_job(resume_text, job_desc)
+        time.sleep(1.5)
     st.metric(label="Match Percentage", value=f"{match_score * 100:.2f}%")
 
-    explanation = explain_match(resume_text, job_desc)
-    with st.expander("🧠 Contextual Match Insights"):
-        st.write(explanation)
+    # Contextual sentence match
+    with st.expander("🧠 Top Matching Sentences"):
+        explanation = explain_match(resume_text, job_desc)
+        st.markdown(explanation)
 
-    feedback = gpt_feedback(resume_text, job_desc)
-    with st.expander("💡 Smart Suggestions (AI)"):
-        st.write(feedback)
+    # Smart Suggestions
+    if st.button("💡 Generate Smart AI Suggestions"):
+        with st.spinner("✍️ Crafting personalized feedback..."):
+            feedback = gpt_feedback(resume_text, job_desc)
+        st.markdown("#### 💡 Smart Suggestions")
+        st.markdown(feedback)
 
+    # Final message
+    st.markdown("---")
     if match_score >= 0.7:
-        st.success("Great match! Your resume fits well with this job.")
+        st.success("✅ Excellent match! Your resume is a strong fit.")
     elif match_score >= 0.4:
-        st.warning("Decent match. You may need to tweak your resume.")
+        st.warning("⚠️ Moderate match. Consider tailoring your resume further.")
     else:
-        st.error("Low match. Consider improving your resume for this role.")
+        st.error("❌ Low match. You should definitely revise your resume.")
 
+    # Report download
     if st.button("📄 Download Report"):
         report = f"""
-        Resume Match Report - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-        ------------------------------------------------------------
-        Match Score: {match_score * 100:.2f}%
-        Extracted Resume Skills: {', '.join(extracted_resume_skills)}
-        Extracted Job Skills: {', '.join(extracted_job_skills)}
+Resume Match Report - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+------------------------------------------------------------
+Match Score: {match_score * 100:.2f}%
+Resume Skills: {', '.join(extracted_resume_skills)}
+Job Skills: {', '.join(extracted_job_skills)}
 
-        Contextual Match:
-        {explanation}
+Top Matching Sentences:
+{explanation}
 
-        Suggestions:
-        {feedback}
-        """
+AI Suggestions:
+{feedback if 'feedback' in locals() else 'Not generated yet.'}
+"""
         b64 = base64.b64encode(report.encode()).decode()
-        href = f'<a href="data:file/txt;base64,{b64}" download="resume_report.txt">📥 Click to download your report</a>'
+        href = f'<a href="data:file/txt;base64,{b64}" download="resume_report.txt">📥 Download Full Report</a>'
         st.markdown(href, unsafe_allow_html=True)
 
 else:
-    st.info("Please upload your resume and paste a job description to get started.")
+    st.info("👆 Please upload your resume and paste a job description to begin.")
