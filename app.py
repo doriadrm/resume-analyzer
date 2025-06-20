@@ -25,18 +25,9 @@ def gpt_feedback(resume, job):
 
 st.set_page_config(page_title="Resume Analyzer AI", page_icon="📄")
 
-<<<<<<< HEAD
 st.title("📄 Resume Analyzer with AI 🤖")
 st.markdown("Upload your resume, paste a job description, and see how well your resume matches!")
 
-=======
-st.set_page_config(page_title="Resume Analyzer AI", page_icon="📄")
-
-st.title("📄 Resume Analyzer with AI 🤖")
-st.markdown("Upload your resume, paste a job description, and see how well your resume matches!")
-
-# Upload resume file
->>>>>>> 80630c1d5d0d8395d9d3adb2079403dc938ae778
 uploaded_file = st.file_uploader("📁 Upload your resume (PDF or DOCX)", type=["pdf", "docx"])
 job_desc = st.text_area("📝 Paste the job description here:")
 
@@ -58,7 +49,6 @@ if uploaded_file and job_desc:
     with st.expander("🔍 View Extracted Resume Text"):
         st.write(resume_text or "No text found.")
 
-<<<<<<< HEAD
     extracted_resume_skills = extract_skills(resume_text)
     extracted_job_skills = extract_skills(job_desc)
 
@@ -105,19 +95,10 @@ if uploaded_file and job_desc:
 
     st.subheader("📊 Skills Match Overview")
     show_skill_charts(extracted_resume_skills, extracted_job_skills)
-=======
-    extracted_skills = extract_skills(resume_text)
-    st.subheader("🎯 Extracted Skills")
-    if extracted_skills:
-        st.success(", ".join(sorted(extracted_skills)))
-    else:
-        st.warning("No relevant skills detected.")
->>>>>>> 80630c1d5d0d8395d9d3adb2079403dc938ae778
 
     match_score = match_resume_to_job(resume_text, job_desc)
     st.subheader("✅ Resume Match Score")
     st.metric(label="Match Percentage", value=f"{match_score * 100:.2f}%")
-<<<<<<< HEAD
 
     explanation = explain_match(resume_text, job_desc)
     with st.expander("🧠 Contextual Match Insights"):
@@ -126,8 +107,6 @@ if uploaded_file and job_desc:
     feedback = gpt_feedback(resume_text, job_desc)
     with st.expander("💡 Smart Suggestions (AI)"):
         st.write(feedback)
-=======
->>>>>>> 80630c1d5d0d8395d9d3adb2079403dc938ae778
 
     if match_score >= 0.7:
         st.success("Great match! Your resume fits well with this job.")
@@ -135,7 +114,6 @@ if uploaded_file and job_desc:
         st.warning("Decent match. You may need to tweak your resume.")
     else:
         st.error("Low match. Consider improving your resume for this role.")
-<<<<<<< HEAD
 
     if st.button("📄 Download Report"):
         report = f"""
@@ -157,7 +135,3 @@ if uploaded_file and job_desc:
 
 else:
     st.info("Please upload your resume and paste a job description to get started.")
-=======
-else:
-    st.info("Please upload your resume and paste a job description to get started.")
->>>>>>> 80630c1d5d0d8395d9d3adb2079403dc938ae778
