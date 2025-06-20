@@ -128,19 +128,19 @@ if uploaded_file and job_desc:
         time.sleep(1.5)
     st.metric(label="Match Percentage", value=f"{match_score * 100:.2f}%")
 
-    # Contextual sentence match
+    #contextual sentence match
     with st.expander("🧠 Top Matching Sentences"):
         explanation = explain_match(resume_text, job_desc)
         st.markdown(explanation)
 
-    # Smart Suggestions
+    #smart suggestions
     if st.button("💡 Generate Smart AI Suggestions"):
         with st.spinner("✍️ Crafting personalized feedback..."):
             feedback = gpt_feedback(resume_text, job_desc)
         st.markdown("#### 💡 Smart Suggestions")
         st.markdown(feedback)
 
-    # Final message
+    #final message
     st.markdown("---")
     if match_score >= 0.7:
         st.success("✅ Excellent match! Your resume is a strong fit.")
@@ -149,7 +149,7 @@ if uploaded_file and job_desc:
     else:
         st.error("❌ Low match. You should definitely revise your resume.")
 
-    # Report download
+    #report download
     if st.button("📄 Download Report"):
         report = f"""
 Resume Match Report - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
