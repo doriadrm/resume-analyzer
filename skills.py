@@ -3,23 +3,26 @@ import re
 
 nlp = spacy.load("en_core_web_sm")
 
-# Sample skill set
+# Expanded skills DB (you can add more)
 SKILLS_DB = {
-    "Machine Learning", "Deep Learning", "Python", "SQL", "TensorFlow", "Pandas",
-    "Scikit-learn", "Big Data", "NLP", "Data Science", "Cloud Computing", "AWS",
-    "Azure", "Docker", "Kubernetes", "Java", "C#", "React", "Node.js"
+    "machine learning", "deep learning", "python", "sql", "tensorflow", "pandas",
+    "scikit-learn", "big data", "nlp", "data science", "cloud computing", "aws",
+    "azure", "docker", "kubernetes", "java", "c#", "react", "node.js", "fastapi",
+    "flask", "linux", "git", "bash", "powerbi", "tableau"
 }
 
 def extract_skills(text):
-    """Extracts skills from resume text using NLP"""
-    extracted_skills = set()
-    
+    """Extracts skills from resume text using spaCy and regex."""
+    extracted = set()
+    text = text.lower()
     doc = nlp(text)
-    
-    for token in doc:
-        word = token.text.lower()
-        for skill in SKILLS_DB:
-            if re.search(rf"\b{skill.lower()}\b", word):
-                extracted_skills.add(skill)
 
-    return list(extracted_skills)
+    tokens = [token.text for token in doc]
+    full_text = " ".join(tokens)
+
+    for skill in SKILLS_DB:
+        pattern = rf"\b{re.escape(skill.lower())}\b"
+        if re.search(pattern, full_text):
+            extracted.add(skill.title())
+
+    return list(extracted)
