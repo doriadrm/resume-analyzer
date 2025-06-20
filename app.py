@@ -9,7 +9,6 @@ from datetime import datetime
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 
-# Load a better lightweight summarization model for CPU use
 model_name = "facebook/bart-large-cnn"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
