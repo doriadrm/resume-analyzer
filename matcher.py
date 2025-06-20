@@ -18,6 +18,3 @@ def explain_match(resume_text, job_desc):
 
     top_matches = sorted(scored, key=lambda x: x[1], reverse=True)[:5]
     return "\n\n".join([f"• {sent} ({score:.2f})" for sent, score in top_matches]) or "No strong semantic matches found."
-
-def gpt_feedback(resume_text, job_desc):
-    return "⚠️ GPT feedback placeholder: You can integrate OpenAI API here to generate tailored advice."
