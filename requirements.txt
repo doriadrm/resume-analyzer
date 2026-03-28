@@ -1,7 +1,7 @@
 streamlit
 pdfplumber
 python-docx
-spacy
+spacy==3.7.2
 plotly
 sentence-transformers
 scikit-learn
