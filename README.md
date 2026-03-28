@@ -1,20 +1,20 @@
-# 📄 Resume Analyzer with AI 🤖
+# Resume Analyzer with AI 
 
 A smart and interactive Streamlit web app that helps you evaluate how well your resume matches a specific job description using NLP and AI-powered suggestions.
 
-## 🚀 Features
+## Features
 
-- 📄 Extracts text from PDF and DOCX resumes  
-- 🧠 Identifies relevant skills from your resume and the job description using NLP  
-- 🤖 Calculates a semantic similarity match score using Sentence Transformers  
-- 📊 Visualizes matched vs missing skills using bar and pie charts  
-- 💡 Generates tailored resume improvement suggestions using a Hugging Face summarization model
+- Extracts text from PDF and DOCX resumes  
+- Identifies relevant skills from your resume and the job description using NLP  
+- Calculates a semantic similarity match score using Sentence Transformers  
+- Visualizes matched vs missing skills using bar and pie charts  
+- Generates tailored resume improvement suggestions using a Hugging Face summarization model
 
-## 🔗 Try It Live
+## Try It Live
 
-👉 [Click here to test the app directly on Hugging Face Spaces](https://huggingface.co/spaces/doriadrm/resume-analyzer)
+[Click here to test the app directly on Hugging Face Spaces](https://huggingface.co/spaces/doriadrm/resume-analyzer)
 
-## 📌 Local Setup
+## Local Setup
 
 ```bash
 # Clone the repository
