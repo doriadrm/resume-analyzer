@@ -2,8 +2,6 @@ streamlit
 pdfplumber
 python-docx
 spacy
-thinc
-blis
 plotly
 sentence-transformers
 scikit-learn
