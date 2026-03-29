@@ -9,6 +9,11 @@ from datetime import datetime
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 import time
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 #load summarization model (cached)
 @st.cache_resource
@@ -75,10 +80,17 @@ if uploaded_file and job_desc:
         try:
             if uploaded_file.name.endswith(".pdf"):
                 resume_text = extract_text_from_pdf(uploaded_file)
+                logger.info("Successfully extracted text from PDF resume")
             elif uploaded_file.name.endswith(".docx"):
                 resume_text = extract_text_from_docx(uploaded_file)
+                logger.info("Successfully extracted text from DOCX resume")
+            else:
+                st.error("❌ Unsupported file format")
+                logger.error(f"Unsupported file format: {uploaded_file.name}")
+                st.stop()
         except Exception as e:
             st.error(f"❌ Error extracting text: {e}")
+            logger.error(f"Error extracting text from resume: {e}")
             st.stop()
 
     st.success("✅ Resume parsed successfully!")
@@ -86,6 +98,7 @@ if uploaded_file and job_desc:
     #Extracted skills
     extracted_resume_skills = extract_skills(resume_text)
     extracted_job_skills = extract_skills(job_desc)
+    logger.info(f"Extracted {len(extracted_resume_skills)} skills from resume, {len(extracted_job_skills)} from job description")
 
     def show_skill_charts(resume_skills, job_skills):
         matched = set(s.lower() for s in resume_skills) & set(s.lower() for s in job_skills)
@@ -126,6 +139,7 @@ if uploaded_file and job_desc:
     with st.spinner("🔎 Calculating similarity..."):
         match_score = match_resume_to_job(resume_text, job_desc)
         time.sleep(1.5)
+    logger.info(f"Calculated match score: {match_score:.2f}")
     st.metric(label="Match Percentage", value=f"{match_score * 100:.2f}%")
 
     #contextual sentence match
