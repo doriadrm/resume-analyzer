@@ -68,10 +68,3 @@ streamlit run app.py
 - Hugging Face Transformers
 - Plotly for visualizations
 
-## Contributing
-
-Contributions are welcome! Please ensure code quality and add tests for new features.
-
-## License
-
-MIT License
