@@ -1,7 +1,3 @@
-"""
-Resume Analyzer AI - Production-grade Streamlit application for resume-job matching.
-"""
-
 import streamlit as st
 from resume_parser import extract_text_from_pdf, extract_text_from_docx, get_resume_metadata
 from matcher import match_resume_to_job, explain_match, get_match_breakdown
