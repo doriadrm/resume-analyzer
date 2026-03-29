@@ -98,7 +98,7 @@ def create_hero_section():
     """Create styled hero section."""
     st.markdown(f"""
     <div class="hero-section">
-        <h1>🎯 {APP_NAME}</h1>
+        <h1>{APP_NAME}</h1>
         <p>{APP_DESCRIPTION}</p>
     </div>
     """, unsafe_allow_html=True)
@@ -106,9 +106,7 @@ def create_hero_section():
 def create_sidebar():
     """Create sidebar with app info and settings."""
     with st.sidebar:
-        st.image("https://via.placeholder.com/150x100/667eea/white?text=Resume+AI", width=150)
-
-        st.header("⚙️ Settings")
+        st.header("Settings")
 
         # Settings toggles
         st.session_state.show_raw_text = st.checkbox("Show raw resume text", value=False)
@@ -118,16 +116,16 @@ def create_sidebar():
             index=0
         )
 
-        st.header("📋 How it works")
+        st.header("How it works")
         st.markdown("""
-        1. **Upload** your resume (PDF/DOCX)
-        2. **Paste** job description
-        3. **Analyze** for skill matches & semantic similarity
-        4. **Get AI feedback** for improvements
-        5. **Download** detailed report
+        1. Upload your resume (PDF/DOCX)
+        2. Paste job description
+        3. Analyze for skill matches & semantic similarity
+        4. Get AI feedback for improvements
+        5. Download detailed report
         """)
 
-        st.header("📊 About")
+        st.header("About")
         st.info(f"Version 2.0.0 | Built with Streamlit & AI models")
 
 def generate_ai_feedback(resume: str, job: str, depth: str = "Quick") -> str:
@@ -253,30 +251,30 @@ def generate_html_report(match_data: dict, skills_data: dict) -> str:
     </head>
     <body>
         <div class="header">
-            <h1>📄 Resume Analysis Report</h1>
+            <h1>Resume Analysis Report</h1>
             <p>Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
         </div>
 
         <div class="section">
-            <h2>📊 Match Score</h2>
+            <h2>Match Score</h2>
             <div class="score-badge">{format_percentage(score)}</div>
         </div>
 
         <div class="section">
-            <h2>🎯 Skills Analysis</h2>
+            <h2>Skills Analysis</h2>
             <p><strong>Resume Skills:</strong> {', '.join(skills_data['resume_skills'])}</p>
             <p><strong>Job Skills:</strong> {', '.join(skills_data['job_skills'])}</p>
             <p><strong>Matched:</strong> {len(skills_data['matched'])} | <strong>Missing:</strong> {len(skills_data['missing'])}</p>
         </div>
 
         <div class="section">
-            <h2>🧠 Semantic Match</h2>
+            <h2>Semantic Match</h2>
             <p><strong>Keyword Overlap:</strong> {match_data['keyword_overlap_ratio']:.2%}</p>
             <p><strong>Semantic Density:</strong> {match_data['semantic_density']:.3f}</p>
         </div>
 
         <div class="section">
-            <h2>💡 AI Feedback</h2>
+            <h2>AI Feedback</h2>
             <p>{match_data.get('ai_feedback', 'Not generated')}</p>
         </div>
     </body>
@@ -294,10 +292,10 @@ def main():
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        uploaded_file = st.file_uploader("📁 Upload Resume", type=["pdf", "docx"])
+        uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
 
     with col2:
-        job_desc = st.text_area("📝 Paste Job Description", height=100)
+        job_desc = st.text_area("Job Description", height=100)
 
     # Validation
     validation_error = None
@@ -312,12 +310,12 @@ def main():
         return
 
     if not uploaded_file or not job_desc:
-        st.info("👆 Please upload your resume and paste a job description to begin.")
+        st.info("Please upload your resume and paste a job description to begin.")
         return
 
     # Processing with progress
-    with st.status("🔍 Processing resume...", expanded=True) as status:
-        st.write("📖 Extracting text from resume...")
+    with st.status("Processing resume...", expanded=True) as status:
+        st.write("Extracting text from resume...")
 
         # Extract text
         try:
@@ -339,47 +337,47 @@ def main():
             st.markdown('<div class="error-message">❌ Could not extract text from the uploaded file.</div>', unsafe_allow_html=True)
             return
 
-        st.write("✅ Text extracted successfully!")
-        status.update(label="🔍 Processing resume... Done!", state="complete")
+        st.write("Text extracted successfully!")
+        status.update(label="Processing resume... Done!", state="complete")
 
     # Skills extraction
-    with st.status("🎯 Analyzing skills...", expanded=True) as status:
-        st.write("🔍 Extracting skills from resume and job description...")
+    with st.status("Analyzing skills...", expanded=True) as status:
+        st.write("Extracting skills from resume and job description...")
 
         resume_skills = extract_skills(resume_text)
         job_skills = extract_skills(job_desc)
         categorized_skills = categorize_skills(resume_skills)
 
-        st.write("✅ Skills extracted!")
-        status.update(label="🎯 Analyzing skills... Done!", state="complete")
+        st.write("Skills extracted!")
+        status.update(label="Analyzing skills... Done!", state="complete")
 
     # Semantic matching
-    with st.status("🧠 Calculating match score...", expanded=True) as status:
-        st.write("🔎 Computing semantic similarity...")
+    with st.status("Calculating match score...", expanded=True) as status:
+        st.write("Computing semantic similarity...")
 
         match_score = match_resume_to_job(resume_text, job_desc)
         match_breakdown = get_match_breakdown(resume_text, job_desc)
 
-        st.write("✅ Match calculated!")
-        status.update(label="🧠 Calculating match score... Done!", state="complete")
+        st.write("Match calculated!")
+        status.update(label="Calculating match score... Done!", state="complete")
 
     # AI Feedback
-    with st.status("💡 Generating AI feedback...", expanded=True) as status:
-        st.write("✍️ Crafting personalized suggestions...")
+    with st.status("Generating AI feedback...", expanded=True) as status:
+        st.write("Crafting personalized suggestions...")
 
         ai_feedback = generate_ai_feedback(resume_text, job_desc, st.session_state.feedback_depth)
 
-        st.write("✅ Feedback generated!")
-        status.update(label="💡 Generating AI feedback... Done!", state="complete")
+        st.write("Feedback generated!")
+        status.update(label="Generating AI feedback... Done!", state="complete")
 
     # Create tabs
     tab_overview, tab_skills, tab_semantic, tab_feedback, tab_report = st.tabs(
-        ["📊 Overview", "🎯 Skills", "🧠 Semantic Match", "💡 AI Feedback", "📄 Report"]
+        ["Overview", "Skills", "Semantic Match", "AI Feedback", "Report"]
     )
 
     # Overview Tab
     with tab_overview:
-        st.header("📊 Analysis Overview")
+        st.header("Analysis Overview")
 
         # Summary cards
         col1, col2, col3, col4 = st.columns(4)
@@ -403,15 +401,15 @@ def main():
 
         # Match interpretation
         if match_score >= GOOD_MATCH:
-            st.markdown('<div class="success-message">✅ Excellent match! Your resume is a strong fit.</div>', unsafe_allow_html=True)
+            st.markdown('<div class="success-message">Excellent match! Your resume is a strong fit.</div>', unsafe_allow_html=True)
         elif match_score >= MODERATE_MATCH:
-            st.warning("⚠️ Moderate match. Consider tailoring your resume further.")
+            st.warning("Moderate match. Consider tailoring your resume further.")
         else:
-            st.markdown('<div class="error-message">❌ Low match. Significant improvements needed.</div>', unsafe_allow_html=True)
+            st.markdown('<div class="error-message">Low match. Significant improvements needed.</div>', unsafe_allow_html=True)
 
     # Skills Tab
     with tab_skills:
-        st.header("🎯 Skills Analysis")
+        st.header("Skills Analysis")
 
         # Charts
         pie_fig, bar_fig = create_skills_charts(resume_skills, job_skills, categorized_skills)
@@ -427,7 +425,7 @@ def main():
                 st.info("No matched skills to display.")
 
         # Categorized skills table
-        st.subheader("📋 Categorized Skills")
+        st.subheader("Categorized Skills")
         if categorized_skills:
             # Create a dataframe for better display
             skill_rows = []
@@ -451,7 +449,7 @@ def main():
 
     # Semantic Match Tab
     with tab_semantic:
-        st.header("🧠 Semantic Match Details")
+        st.header("Semantic Match Details")
 
         col1, col2 = st.columns(2)
         with col1:
@@ -459,13 +457,13 @@ def main():
         with col2:
             st.metric("Semantic Density", f"{match_breakdown['semantic_density']:.3f}")
 
-        st.subheader("🎯 Top Matching Sentences")
+        st.subheader("Top Matching Sentences")
         explanation = explain_match(resume_text, job_desc)
         st.markdown(explanation)
 
     # AI Feedback Tab
     with tab_feedback:
-        st.header("💡 AI-Powered Feedback")
+        st.header("AI-Powered Feedback")
 
         if st.session_state.feedback_depth == "Detailed":
             st.info("📝 Detailed feedback mode - more comprehensive suggestions")
@@ -474,7 +472,7 @@ def main():
 
     # Report Tab
     with tab_report:
-        st.header("📄 Download Report")
+        st.header("Download Report")
 
         # Prepare report data
         report_data = {
@@ -495,7 +493,7 @@ def main():
 
         # Download button
         st.download_button(
-            label="📥 Download HTML Report",
+            label="Download HTML Report",
             data=html_report,
             file_name=f"resume_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html",
             mime="text/html"
@@ -503,7 +501,7 @@ def main():
 
     # Optional raw text display
     if st.session_state.show_raw_text:
-        with st.expander("📄 Raw Resume Text"):
+        with st.expander("Raw Resume Text"):
             st.text_area("Extracted Text", resume_text, height=200, disabled=True)
 
 if __name__ == "__main__":
